@@ -5,17 +5,18 @@ export const calculateDistance = async (
   ssid2: string,
 ): Promise<number> => {
   try {
-    const temp = await WifiManager.connectToSSID(ssid1);
-    console.log(temp);
+    await WifiManager.connectToSSID(ssid1);
     const wifiSignal1RSSIValue = await WifiManager.getCurrentSignalStrength();
+
     await WifiManager.connectToSSID(ssid2);
     const wifiSignal2RSSIValue = await WifiManager.getCurrentSignalStrength();
-    console.log(wifiSignal1RSSIValue);
-    console.log(wifiSignal2RSSIValue);
+
+    const frequency = await WifiManager.getFrequency();
 
     const distance = calculateDistanceBasedOnSignalStrength(
-      await wifiSignal1RSSIValue,
-      await wifiSignal2RSSIValue,
+      wifiSignal1RSSIValue,
+      wifiSignal2RSSIValue,
+      frequency,
     );
 
     return distance;
@@ -26,10 +27,11 @@ export const calculateDistance = async (
 };
 
 const calculateDistanceBasedOnSignalStrength = (
-  _signal1: number,
-  _signal2: number,
+  signal1: number,
+  signal2: number,
+  frequency: number,
 ): number => {
-  const k = 10; // Some constant factor
-
-  return k;
+  const exp =
+    (27.55 - 20 * Math.log10(frequency) + Math.abs(signal1 - signal2)) / 20.0;
+  return Math.pow(10.0, exp);
 };
